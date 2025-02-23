@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:latest
+    container_name: meu_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: usuario_produto
+      POSTGRES_PASSWORD: qweasd12
+      POSTGRES_DB: banco_produtos
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgresql:/var/lib/postgresql/data  # Agora os dados ficam na pasta ./postgresql, para ficar em Volume Nomeado tirar o './'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U usuario_produto -d banco_produtos"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
+  api:
+    build: .
+    container_name: api_produtos_docker
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "7003:7003"
+    environment:
+      DATABASE_URL: postgresql://usuario_produto:qweasd12@db:5432/banco_produtos
+    volumes:
+      - .:/app  # Certifique-se de que faz sentido com seu Dockerfile
+
+
+ # 🚨 REMOVA esta duas linhas, pois agora não estamos usando volumes nomeados:
+#volumes:
+  # postgres_data:
