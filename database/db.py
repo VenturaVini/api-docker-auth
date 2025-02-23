@@ -1,22 +1,25 @@
 import logging
-from sqlalchemy import create_engine, Column, Integer, String, Text, Numeric
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 import psycopg2
+from urllib.parse import quote
+from sqlalchemy import create_engine, Column, Integer, String, Text, Numeric
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 # Configuração do logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Definição das credenciais do banco
+# Credenciais do banco
 DB_USER = "usuario_produto"
 DB_PASSWORD = "qweasd12"
-DB_HOST = "db"  # Nome do serviço no Docker Compose
+DB_HOST = "db"
 DB_PORT = "5432"
 DB_NAME = "banco_produtos"
 
+# Escapar senha
+DB_PASSWORD_ESCAPED = quote(DB_PASSWORD)
+
 # Conectar ao PostgreSQL sem especificar o banco
-DATABASE_URL_BASE = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/postgres"
+DATABASE_URL_BASE = f"postgresql://{DB_USER}:{DB_PASSWORD_ESCAPED}@{DB_HOST}:{DB_PORT}/postgres"
 
 def criar_banco():
     """Cria o banco de dados caso ele não exista."""
@@ -25,27 +28,20 @@ def criar_banco():
         conn.autocommit = True
         cursor = conn.cursor()
 
-        # Verifica se o banco já existe
-        cursor.execute(f"SELECT 1 FROM pg_catalog.pg_database WHERE datname = '{DB_NAME}'")
-        existe = cursor.fetchone()
-
-        if not existe:
-            cursor.execute(f"CREATE DATABASE {DB_NAME}")
+        cursor.execute(f"SELECT 1 FROM pg_database WHERE datname = '{DB_NAME}'")
+        if not cursor.fetchone():
+            cursor.execute(f"CREATE DATABASE {DB_NAME} WITH ENCODING 'UTF8' TEMPLATE template0;")
             logger.info(f"✅ Banco '{DB_NAME}' criado com sucesso!")
-            return True
         else:
             logger.info(f"✅ Banco '{DB_NAME}' já existe.")
-            return False
-
     except Exception as e:
         logger.error(f"❌ Erro ao criar o banco: {e}")
-        return False
     finally:
         cursor.close()
         conn.close()
 
 # Agora conecta ao banco correto
-DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD_ESCAPED}@{DB_HOST}:{DB_PORT}/{DB_NAME}?client_encoding=utf8"
 engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20)
 
 # Criando sessão do banco
@@ -54,7 +50,6 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Criando base de modelos
 Base = declarative_base()
 
-# Modelo de Produtos no banco
 class ProdutoDB(Base):
     __tablename__ = "produtos"
 
