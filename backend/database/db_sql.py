@@ -3,13 +3,19 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import OperationalError
 import os
+import os
+from sqlalchemy import create_engine
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
 
-# Obtendo a URL do banco de dados das variáveis de ambiente
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://myuser:mypassword@db:5432/mydatabase")
+# # Obtendo a URL do banco de dados das variáveis de ambiente
+# DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://myuser:mypassword@db:5432/mydatabase")
 
-# Criando o engine e a sessão do SQLAlchemy
-engine = create_engine(DATABASE_URL)
+# # Criando o engine e a sessão do SQLAlchemy
+# engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
