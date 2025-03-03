@@ -1,3 +1,5 @@
+import os
+from fastapi.responses import FileResponse
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database.db_sql import get_db, UsuarioDB, criar_banco
@@ -33,7 +35,14 @@ def login(usuario: Usuario, db: Session = Depends(get_db)):
 
     token = criar_token(usuario.username)
     enviar_mensagem(f'Usuário logado: {usuario.username}')
-    return {"access_token": token}
+    #return {"access_token": token}  # normal
+    # Criar um arquivo temporário com o token
+    file_path = "token.txt"
+    with open(file_path, "w") as f:
+        f.write(token)
+
+    return FileResponse(file_path, filename="token.txt", media_type="text/plain")
+
 
 @router.post("/change_password")
 def change_password(usuario: NovaSenha, db: Session = Depends(get_db)):
