@@ -1,3 +1,3 @@
 const CONFIG = {
-    API_URL: "http://192.168.0.10:7200"
+    API_URL: "http:///45.77.150.143:7200"
 };
