@@ -1,7 +1,9 @@
 from sqlalchemy import create_engine, Column, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import OperationalError
 import os
+
 
 # Obtendo a URL do banco de dados das variáveis de ambiente
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://myuser:mypassword@db:5432/mydatabase")
@@ -20,7 +22,12 @@ class UsuarioDB(Base):
 
 # Criando as tabelas no banco de dados
 def criar_banco():
-    Base.metadata.create_all(bind=engine)
+    try:
+        # Tenta criar as tabelas
+        Base.metadata.create_all(bind=engine)
+        print("Banco de dados configurado com sucesso.")
+    except OperationalError as e:
+        print(f"Erro ao conectar ao banco de dados: {e}")
 
 # Função para obter a sessão do banco de dados
 def get_db():
