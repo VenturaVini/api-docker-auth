@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Autenticação</title>
+    <script src="app.js" defer></script> <!-- Referência ao arquivo JS -->
+</head>
+<body>
+    <h1>Teste de Login, Cadastro e Alteração de Senha</h1>
+
+    <!-- Formulário de Cadastro -->
+    <div>
+        <h2>Cadastrar Novo Usuário</h2>
+        <form id="signup-form">
+            <input type="text" id="signup-username" placeholder="Nome de Usuário" required>
+            <input type="password" id="signup-password" placeholder="Senha" required>
+            <button type="submit">Cadastrar</button>
+        </form>
+    </div>
+
+    <!-- Formulário de Login -->
+    <div>
+        <h2>Login</h2>
+        <form id="login-form">
+            <input type="text" id="login-username" placeholder="Nome de Usuário" required>
+            <input type="password" id="login-password" placeholder="Senha" required>
+            <button type="submit">Entrar</button>
+        </form>
+    </div>
+
+    <!-- Formulário de Alteração de Senha -->
+    <div>
+        <h2>Alterar Senha</h2>
+        <form id="change-password-form">
+            <input type="text" id="change-username" placeholder="Nome de Usuário" required>
+            <input type="password" id="current-password" placeholder="Senha Atual" required>
+            <input type="password" id="new-password" placeholder="Nova Senha" required>
+            <button type="submit">Alterar Senha</button>
+        </form>
+    </div>
+</body>
+</html>

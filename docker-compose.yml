@@ -1,39 +1,47 @@
-version: "3.8"
-
+version: '3'
 services:
   db:
     image: postgres:latest
-    container_name: meu_postgres
-    restart: unless-stopped
+    container_name: postgres_db
+    restart: always
     environment:
-      POSTGRES_USER: usuario_produto
-      POSTGRES_PASSWORD: qweasd12
-      POSTGRES_DB: banco_produtos
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
     ports:
       - "5432:5432"
     volumes:
-      - ./postgresql:/var/lib/postgresql/data  # Agora os dados ficam na pasta ./postgresql, para ficar em Volume Nomeado tirar o './'
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U usuario_produto -d banco_produtos"]
-      interval: 10s
-      retries: 5
-      start_period: 10s
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
 
-  api:
-    build: .
-    container_name: api_produtos_docker
-    restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
+  backend:
+    build:
+      context: ./backend
     ports:
-      - "7003:7003"
+      - "7200:7200"
+    networks:
+      - app-network
     environment:
-      DATABASE_URL: postgresql://usuario_produto:qweasd12@db:5432/banco_produtos
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://myuser:mypassword@db:5432/mydatabase
+    depends_on:
+      - db  # O backend só inicia depois do banco estar rodando
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "8080:80"
+    networks:
+      - app-network
     volumes:
-      - .:/app  # Certifique-se de que faz sentido com seu Dockerfile
+      - ./frontend:/usr/share/nginx/html
+    image: nginx:alpine
 
+networks:
+  app-network:
+    driver: bridge
 
- # 🚨 REMOVA esta duas linhas, pois agora não estamos usando volumes nomeados:
-#volumes:
-  # postgres_data:
+volumes:
+  postgres_data:
